@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cisa Doces - Painel Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- CDNs SEM defer — precisam estar prontos antes do script.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+    .img-tab-btn {
+        padding: 5px 14px; border-radius: 6px; border: 1.5px solid #d4b0bf;
+        background: transparent; cursor: pointer; font-size: 12px; font-weight: 500;
+        color: #777; transition: all .2s;
+    }
+    .img-tab-active { background: #a00045; color: #fff; border-color: #a00045; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <img src="/src/assets/logo cisa doces.png" alt="Cisa Doces" class="sidebar-logo" style="filter:brightness(0) invert(1);opacity:.9;">
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="dashboard">
+                <i class="fas fa-chart-pie"></i><span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-page="pedidos">
+                <i class="fas fa-receipt"></i><span>Pedidos</span>
+            </a>
+            <a href="#" class="nav-item" data-page="produtos">
+                <i class="fas fa-box"></i><span>Produtos</span>
+            </a>
+            <a href="#" class="nav-item" data-page="relatorios">
+                <i class="fas fa-chart-bar"></i><span>Relatórios</span>
+            </a>
+            <a href="#" class="nav-item" data-page="historico">
+                <i class="fas fa-history"></i><span>Histórico</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <button id="new-order-btn" class="btn btn-primary">
+                <i class="fas fa-plus"></i><span>Novo Pedido</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main class="main-content">
+        <header class="main-header">
+            <div class="header-actions">
+                <div class="theme-switcher">
+                    <i class="fas fa-sun"></i>
+                    <label class="switch">
+                        <input type="checkbox" id="dark-mode-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <i class="fas fa-moon"></i>
+                </div>
+                <div class="user-profile" style="display:flex;align-items:center;gap:12px;">
+                    <span id="admin-name-display" style="font-size:13px;font-weight:500;color:var(--color-text-secondary);"></span>
+                    <img src="https://i.imgur.com/QdG4x0a.png" alt="User">
+                    <button onclick="adminLogout()" style="padding:7px 16px;background:transparent;border:1.5px solid var(--color-primary);color:var(--color-primary);border-radius:20px;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;" onmouseover="this.style.background='var(--color-primary)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='var(--color-primary)'">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </button>
+                    <!-- Botão limpar localStorage -->
+                    <button onclick="limparDados()" title="Limpar todos os dados" style="padding:7px 16px;background:transparent;border:1.5px solid #ef4444;color:#ef4444;border-radius:20px;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;" onmouseover="this.style.background='#ef4444';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#ef4444'">
+                        <i class="fas fa-trash-alt"></i> Limpar Dados
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="page-container">
+
+            <!-- ===== DASHBOARD ===== -->
+            <section id="dashboard" class="page active">
+                <h1 class="page-title">Dashboard</h1>
+                <div class="dashboard-grid">
+                    <div class="card metric-card">
+                        <div class="metric-icon" style="background:linear-gradient(135deg,#D9AAB7,#c48599)"><i class="fas fa-coins"></i></div>
+                        <div class="metric-info">
+                            <h3>Vendas do Dia</h3>
+                            <p id="vendas-dia">R$ 0,00</p>
+                        </div>
+                    </div>
+                    <div class="card metric-card">
+                        <div class="metric-icon" style="background:linear-gradient(135deg,#A67B5B,#8a6348)"><i class="fas fa-calendar-alt"></i></div>
+                        <div class="metric-info">
+                            <h3>Vendas do Mês</h3>
+                            <p id="vendas-mes">R$ 0,00</p>
+                        </div>
+                    </div>
+                    <div class="card metric-card">
+                        <div class="metric-icon" style="background:linear-gradient(135deg,#10b981,#059669)"><i class="fas fa-ticket-alt"></i></div>
+                        <div class="metric-info">
+                            <h3>Ticket Médio</h3>
+                            <p id="ticket-medio">R$ 0,00</p>
+                        </div>
+                    </div>
+                    <div class="card metric-card">
+                        <div class="metric-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-clock"></i></div>
+                        <div class="metric-info">
+                            <h3>Pedidos Pendentes</h3>
+                            <p id="novos-pedidos">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="charts-grid">
+                    <div class="chart-container card">
+                        <h3>Vendas (últimos 7 dias)</h3>
+                        <canvas id="vendas-chart"></canvas>
+                    </div>
+                    <div class="chart-container card">
+                        <h3>Produtos Mais Vendidos</h3>
+                        <canvas id="produtos-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== PEDIDOS ===== -->
+            <section id="pedidos" class="page">
+                <div class="page-header">
+                    <h1 class="page-title">Pedidos</h1>
+                </div>
+
+                <div class="order-section">
+                    <div class="order-section-header status-pendente">
+                        <i class="fas fa-clock"></i> Pendente
+                        <span class="order-count" id="count-pendente">0</span>
+                    </div>
+                    <div id="order-list-pendente" class="order-table-wrapper">
+                        <p class="empty-orders">Nenhum pedido pendente.</p>
+                    </div>
+                </div>
+
+                <div class="order-section">
+                    <div class="order-section-header status-preparo">
+                        <i class="fas fa-fire"></i> Em Preparo
+                        <span class="order-count" id="count-preparo">0</span>
+                    </div>
+                    <div id="order-list-preparo" class="order-table-wrapper">
+                        <p class="empty-orders">Nenhum pedido em preparo.</p>
+                    </div>
+                </div>
+
+                <div class="order-section">
+                    <div class="order-section-header status-entregue">
+                        <i class="fas fa-check-circle"></i> Entregue
+                        <span class="order-count" id="count-entregue">0</span>
+                    </div>
+                    <div id="order-list-entregue" class="order-table-wrapper">
+                        <p class="empty-orders">Nenhum pedido entregue.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== PRODUTOS ===== -->
+            <section id="produtos" class="page">
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="quick-search" placeholder="Busca rápida de produtos...">
+                </div>
+                <div class="page-header">
+                    <h1 class="page-title">Produtos</h1>
+                    <button id="add-product-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Adicionar Produto</button>
+                </div>
+                <div id="product-list-container"></div>
+                <div id="pagination-container"></div>
+            </section>
+
+            <!-- Modal Produto -->
+            <div id="product-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h2 id="modal-title">Adicionar Produto</h2>
+                    <form id="product-form">
+                        <input type="hidden" id="product-id">
+                        <div class="form-group">
+                            <label>Nome do Produto</label>
+                            <input type="text" id="product-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Categoria</label>
+                            <input type="text" id="product-category" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Preço (R$)</label>
+                                <input type="number" id="product-price" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Estoque</label>
+                                <input type="number" id="product-stock" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição</label>
+                            <textarea id="product-description" rows="3" placeholder="Descrição do produto exibida ao cliente..." style="width:100%;border-radius:10px;border:1px solid #d4b0bf;padding:10px;font-family:inherit;font-size:13px;resize:vertical;outline:none;background:var(--color-background);color:var(--color-text-primary);"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Imagem do Produto</label>
+                            <div style="display:flex;gap:8px;margin-bottom:8px;">
+                                <button type="button" id="img-tab-url" class="img-tab-btn img-tab-active" onclick="switchImgTab('url')">🔗 URL</button>
+                                <button type="button" id="img-tab-file" class="img-tab-btn" onclick="switchImgTab('file')">📁 Upload</button>
+                            </div>
+                            <div id="img-url-panel">
+                                <input type="text" id="product-image" placeholder="https://...">
+                            </div>
+                            <div id="img-file-panel" style="display:none;">
+                                <input type="file" id="product-image-file" accept="image/*" style="font-size:13px;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <img id="image-preview" src="" alt="Preview" style="max-width:120px;display:none;border-radius:8px;margin-top:4px;">
+                        </div>
+                        <div class="form-buttons">
+                            <button type="submit" class="btn btn-primary">Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ===== RELATÓRIOS ===== -->
+            <section id="relatorios" class="page">
+                <div class="page-header">
+                    <h1 class="page-title">Relatórios</h1>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <button id="export-excel-btn" class="btn btn-export">
+                            <i class="fas fa-file-excel"></i> Exportar Pedidos
+                        </button>
+                        <button id="export-history-btn" class="btn btn-export-history">
+                            <i class="fas fa-file-excel"></i> Exportar Histórico
+                        </button>
+                    </div>
+                </div>
+
+                <div class="reports-grid">
+                    <div class="card">
+                        <h3><i class="fas fa-filter" style="color:var(--color-primary);margin-right:8px;"></i>Filtrar por Período</h3>
+                        <div class="date-range-filter">
+                            <div class="form-group">
+                                <label>Data de Início</label>
+                                <input type="date" id="start-date">
+                            </div>
+                            <div class="form-group">
+                                <label>Data de Fim</label>
+                                <input type="date" id="end-date">
+                            </div>
+                            <button id="generate-report-btn" class="btn btn-primary">Gerar</button>
+                        </div>
+                        <div id="report-results" class="report-results-container"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3><i class="fas fa-trophy" style="color:#f59e0b;margin-right:8px;"></i>Ranking de Produtos</h3>
+                        <div id="product-ranking-container"></div>
+                    </div>
+                </div>
+
+                <div class="card" id="report-orders-card" style="margin-top:20px;display:none;">
+                    <h3><i class="fas fa-list" style="color:var(--color-secondary);margin-right:8px;"></i>Pedidos no Período</h3>
+                    <div id="report-orders-table"></div>
+                </div>
+            </section>
+
+            <!-- ===== HISTÓRICO ===== -->
+            <section id="historico" class="page">
+                <div class="page-header">
+                    <h1 class="page-title">Histórico</h1>
+                    <span class="historico-badge" id="historico-last-update">
+                        <i class="fas fa-clock"></i> Arquivamento automático à meia-noite
+                    </span>
+                </div>
+
+                <div class="historico-filters">
+                    <div class="historico-filter-group">
+                        <label>De:</label>
+                        <input type="date" id="historico-start">
+                    </div>
+                    <div class="historico-filter-group">
+                        <label>Até:</label>
+                        <input type="date" id="historico-end">
+                    </div>
+                    <button id="historico-filter-btn" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrar</button>
+                    <button id="historico-clear-btn" class="btn btn-secondary"><i class="fas fa-times"></i> Limpar</button>
+                </div>
+
+                <div class="historico-summary">
+                    <div class="historico-summary-card vendas-summary">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <span class="summary-label">Total em Vendas</span>
+                            <span class="summary-value" id="historico-total-vendas">R$ 0,00</span>
+                        </div>
+                    </div>
+                    <div class="historico-summary-card cancelados-summary">
+                        <i class="fas fa-times-circle"></i>
+                        <div>
+                            <span class="summary-label">Pedidos Cancelados</span>
+                            <span class="summary-value" id="historico-total-cancelados">0 pedidos</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-section">
+                    <div class="order-section-header status-entregue">
+                        <i class="fas fa-check-circle"></i> Vendas Concluídas
+                        <span class="order-count" id="count-historico-vendas">0</span>
+                    </div>
+                    <div id="historico-list-vendas" class="order-table-wrapper">
+                        <p class="empty-orders">Nenhuma venda no histórico.</p>
+                    </div>
+                </div>
+
+                <div class="order-section">
+                    <div class="order-section-header status-cancelado">
+                        <i class="fas fa-times-circle"></i> Pedidos Cancelados
+                        <span class="order-count" id="count-historico-cancelados">0</span>
+                    </div>
+                    <div id="historico-list-cancelados" class="order-table-wrapper">
+                        <p class="empty-orders">Nenhum pedido cancelado no histórico.</p>
+                    </div>
+                </div>
+            </section>
+
+        </div><!-- /page-container -->
+    </main>
+</div><!-- /app-container -->
+
+<!-- ===== MODAL: NOVO PEDIDO ===== -->
+<div id="order-modal" class="modal">
+    <div class="modal-content large">
+        <span class="close-modal">&times;</span>
+        <h2>Novo Pedido</h2>
+        <div class="new-order-grid">
+            <div class="order-form-section">
+                <h3>1. Dados do Cliente</h3>
+                <div class="form-group">
+                    <label>Nome do Cliente</label>
+                    <input type="text" id="client-name" placeholder="Nome completo">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Telefone / WhatsApp</label>
+                        <input type="text" id="client-phone" placeholder="(11) 99999-9999">
+                    </div>
+                    <div class="form-group">
+                        <label>CEP</label>
+                        <input type="text" id="client-cep" placeholder="00000-000" maxlength="9">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Endereço</label>
+                    <input type="text" id="client-address" placeholder="Rua, Avenida...">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Número</label>
+                        <input type="text" id="client-number" placeholder="Ex: 123">
+                    </div>
+                    <div class="form-group">
+                        <label>Cidade</label>
+                        <input type="text" id="client-city" placeholder="Cidade">
+                    </div>
+                </div>
+
+                <h3 style="margin-top:1.2rem;">2. Adicionar Produtos</h3>
+                <div class="form-group">
+                    <label>Buscar produto</label>
+                    <input type="text" id="order-product-search" placeholder="Digite o nome do produto...">
+                    <div id="order-product-results"></div>
+                </div>
+            </div>
+
+            <div class="order-summary-section">
+                <h3>3. Resumo do Pedido</h3>
+                <div id="order-items-list">
+                    <p class="empty-cart-message">O carrinho está vazio</p>
+                </div>
+                <div class="order-total">
+                    <strong>Total:</strong>
+                    <span id="order-total-amount">R$ 0,00</span>
+                </div>
+                <div class="form-group">
+                    <label>Status do Pedido</label>
+                    <select id="order-status">
+                        <option value="Pendente">Pendente</option>
+                        <option value="Em preparo">Em preparo</option>
+                        <option value="Entregue">Entregue</option>
+                    </select>
+                </div>
+                <button id="save-order-btn" class="btn btn-primary" style="width:100%;margin-top:12px;">
+                    <i class="fas fa-save"></i> Salvar Pedido
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL: DETALHES DO PEDIDO ===== -->
+<div id="order-detail-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" id="close-detail-modal">&times;</span>
+        <div class="order-detail-header">
+            <div>
+                <h2 id="detail-order-id">Pedido #0000</h2>
+                <span id="detail-order-date" class="detail-date"></span>
+            </div>
+            <span id="detail-order-status-badge" class="detail-status-badge"></span>
+        </div>
+
+        <div class="detail-section">
+            <h4><i class="fas fa-user"></i> Dados do Cliente</h4>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Nome</span>
+                    <span class="detail-value" id="detail-client-name">—</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Telefone</span>
+                    <span class="detail-value" id="detail-client-phone">—</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">CEP</span>
+                    <span class="detail-value" id="detail-client-cep">—</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Cidade</span>
+                    <span class="detail-value" id="detail-client-city">—</span>
+                </div>
+                <div class="detail-item full-width">
+                    <span class="detail-label">Endereço</span>
+                    <span class="detail-value" id="detail-client-address">—</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <h4><i class="fas fa-shopping-basket"></i> Itens do Pedido</h4>
+            <table class="detail-items-table">
+                <thead>
+                    <tr><th>Produto</th><th>Qtd</th><th>Unit.</th><th>Subtotal</th></tr>
+                </thead>
+                <tbody id="detail-items-body"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3"><strong>Total</strong></td>
+                        <td><strong id="detail-total"></strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts inline ANTES do script.js para garantir disponibilidade das funções globais -->
+<script>
+function adminLogout() {
+    sessionStorage.removeItem('cisaAdminLogado');
+    sessionStorage.removeItem('cisaAdminNome');
+    window.location.href = 'login.html';
+}
+
+function limparDados() {
+    if (confirm('Tem certeza que deseja limpar TODOS os dados? Esta ação não pode ser desfeita.')) {
+        localStorage.clear();
+        location.reload();
+    }
+}
+
+// Exibe nome do admin
+const adminNome = sessionStorage.getItem('cisaAdminNome');
+if (adminNome) {
+    const el = document.getElementById('admin-name-display');
+    if (el) el.textContent = adminNome;
+}
+
+/* Alternância URL / Upload de imagem */
+function switchImgTab(tab) {
+    document.getElementById('img-url-panel').style.display  = tab === 'url'  ? '' : 'none';
+    document.getElementById('img-file-panel').style.display = tab === 'file' ? '' : 'none';
+    document.getElementById('img-tab-url').className  = 'img-tab-btn' + (tab === 'url'  ? ' img-tab-active' : '');
+    document.getElementById('img-tab-file').className = 'img-tab-btn' + (tab === 'file' ? ' img-tab-active' : '');
+}
+</script>
+
+<!-- script.js carregado por último, com defer -->
+<script src="script.js" defer></script>
+
+<!-- Listeners de imagem após DOM pronto -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    /* Preview ao digitar URL */
+    document.getElementById('product-image').addEventListener('input', function () {
+        const prev = document.getElementById('image-preview');
+        if (this.value) { prev.src = this.value; prev.style.display = 'block'; }
+        else { prev.style.display = 'none'; }
+    });
+
+    /* Preview e conversão base64 ao escolher arquivo */
+    document.getElementById('product-image-file').addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const base64 = e.target.result;
+            document.getElementById('product-image').value = base64;
+            const prev = document.getElementById('image-preview');
+            prev.src = base64;
+            prev.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    });
+});
+</script>
+
+</body>
+</html>

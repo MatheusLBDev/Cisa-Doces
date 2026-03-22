@@ -1,0 +1,244 @@
+/* ================================================
+   CISA DOCES — admin/admin-login.css
+   ================================================ */
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --pink:      #a00045;
+  --pink-dark: #7a0035;
+  --pink-mid:  #c4005a;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #fff;
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ================================================
+   LAYOUT
+   ================================================ */
+.login-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ================================================
+   LADO ESQUERDO — brand
+   ================================================ */
+.login-brand {
+  width: 45%;
+  background: linear-gradient(145deg, #7a0035 0%, var(--pink) 55%, var(--pink-mid) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-brand::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 30% 70%, rgba(255,255,255,.08), transparent 60%);
+}
+
+.brand-content {
+  position: relative; z-index: 1;
+  color: #fff; text-align: center;
+}
+
+.brand-logo {
+  width: 180px; height: auto;
+  filter: brightness(0) invert(1);
+  opacity: .92;
+  margin-bottom: 32px;
+  display: block; margin-left: auto; margin-right: auto;
+}
+
+.brand-content h1 {
+  font-size: 26px; font-weight: 700;
+  letter-spacing: -.02em;
+  margin-bottom: 12px;
+}
+
+.brand-content p {
+  font-size: 14px; opacity: .8;
+  line-height: 1.7; margin-bottom: 40px;
+}
+
+.brand-stats {
+  display: flex; gap: 32px; justify-content: center;
+}
+
+.stat {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 8px;
+  font-size: 13px; opacity: .85;
+}
+
+.stat i {
+  width: 44px; height: 44px;
+  background: rgba(255,255,255,.15);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+/* ================================================
+   LADO DIREITO — formulário
+   ================================================ */
+.login-form-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: #fafafa;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 24px;
+  padding: 48px 40px;
+  border: 1.5px solid rgba(160,0,69,.10);
+  box-shadow: 0 20px 60px rgba(160,0,69,.08);
+}
+
+.login-card-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.lock-icon {
+  width: 64px; height: 64px;
+  background: linear-gradient(135deg, var(--pink), var(--pink-mid));
+  border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: 0 8px 24px rgba(160,0,69,.25);
+}
+
+.lock-icon i { font-size: 24px; color: #fff; }
+
+.login-card-header h2 {
+  font-size: 22px; font-weight: 700;
+  color: #1a1a1a; margin-bottom: 6px;
+  letter-spacing: -.02em;
+}
+
+.login-card-header p { font-size: 13.5px; color: #777; }
+
+/* Grupos de campo */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12.5px; font-weight: 500;
+  color: #444; margin-bottom: 6px;
+}
+
+.form-group input {
+  width: 100%; height: 44px;
+  border-radius: 12px;
+  border: 1.5px solid #d4b0bf;
+  padding: 0 14px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px; outline: none;
+  background: rgba(240,215,215,.25);
+  transition: border-color .25s, box-shadow .25s, background .2s;
+  color: #1a1a1a;
+}
+
+.form-group input:focus {
+  border-color: var(--pink);
+  box-shadow: 0 0 0 3px rgba(160,0,69,.08);
+  background: #fff;
+}
+
+.form-group input::placeholder { color: rgba(0,0,0,.3); }
+
+/* Campo senha com toggle */
+.input-password {
+  position: relative;
+}
+
+.input-password input { padding-right: 44px; }
+
+.toggle-senha {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  border: none; background: none;
+  color: #aaa; cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  transition: color .2s;
+}
+.toggle-senha:hover { color: var(--pink); }
+
+/* Mensagem de erro */
+.erro-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff0f4;
+  border: 1px solid rgba(160,0,69,.2);
+  color: var(--pink);
+  font-size: 13px; font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+/* Botão login */
+.btn-login {
+  width: 100%; height: 48px;
+  background: var(--pink); color: #fff;
+  border: none; border-radius: 28px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600; font-size: 14px;
+  cursor: pointer; margin-top: 8px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: background .25s, transform .2s, box-shadow .25s;
+}
+
+.btn-login:hover:not(:disabled) {
+  background: var(--pink-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(160,0,69,.3);
+}
+
+.btn-login:disabled {
+  opacity: .7; cursor: not-allowed;
+}
+
+/* Link voltar */
+.voltar-link {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 20px;
+  font-size: 13px; color: #aaa;
+  text-decoration: none;
+  transition: color .2s;
+}
+.voltar-link:hover { color: var(--pink); }
+
+/* ================================================
+   RESPONSIVO
+   ================================================ */
+@media (max-width: 768px) {
+  .login-wrapper  { flex-direction: column; }
+  .login-brand    { width: 100%; padding: 40px 24px; min-height: auto; }
+  .brand-logo     { width: 130px; margin-bottom: 20px; }
+  .brand-content h1 { font-size: 20px; }
+  .brand-stats    { gap: 20px; }
+  .login-form-side { padding: 32px 20px; }
+  .login-card     { padding: 32px 24px; }
+}

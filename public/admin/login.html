@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cisa Doces &mdash; Acesso Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="admin-login.css"/>
+</head>
+<body>
+
+  <div class="login-wrapper">
+
+    <!-- Lado esquerdo — identidade visual -->
+    <div class="login-brand">
+      <div class="brand-content">
+        <img src="../src/assets/logo cisa doces.png" alt="Cisa Doces" class="brand-logo"/>
+        <h1>Painel Administrativo</h1>
+        <p>Gerencie pedidos, produtos e relatórios da Cisa Doces.</p>
+        <div class="brand-stats">
+          <div class="stat"><i class="fas fa-receipt"></i><span>Pedidos</span></div>
+          <div class="stat"><i class="fas fa-chart-pie"></i><span>Relatórios</span></div>
+          <div class="stat"><i class="fas fa-box"></i><span>Produtos</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lado direito — formulário -->
+    <div class="login-form-side">
+      <div class="login-card">
+
+        <div class="login-card-header">
+          <div class="lock-icon"><i class="fas fa-lock"></i></div>
+          <h2>Acesso restrito</h2>
+          <p>Entre com suas credenciais de administrador</p>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fa-regular fa-envelope"></i> Usuário</label>
+          <input type="text" id="adminUser" placeholder="admin" autocomplete="username"/>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fa-regular fa-eye-slash"></i> Senha</label>
+          <div class="input-password">
+            <input type="password" id="adminSenha" placeholder="••••••••" autocomplete="current-password"/>
+            <button class="toggle-senha" onclick="toggleSenha()" type="button" tabindex="-1">
+              <i class="fa-regular fa-eye" id="senhaIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <p class="erro-msg" id="erroMsg" style="display:none;">
+          <i class="fas fa-exclamation-circle"></i> Usuário ou senha incorretos.
+        </p>
+
+        <button class="btn-login" id="btnAdminLogin" onclick="fazerLogin()">
+          <span id="btnTexto">Entrar no Painel</span>
+          <i class="fas fa-arrow-right"></i>
+        </button>
+
+        <a href="../index.html" class="voltar-link">
+          <i class="fas fa-arrow-left"></i> Voltar ao site
+        </a>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ================================================
+       CREDENCIAIS — altere aqui para produção
+       ================================================ */
+    const ADMINS = [
+      { usuario: 'admin',   senha: 'cisa2026',  nome: 'Administrador' },
+      { usuario: 'gerente', senha: 'gerente123', nome: 'Gerente'       },
+    ];
+
+    /* Login via Enter */
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') fazerLogin();
+    });
+
+    function fazerLogin() {
+      const user  = document.getElementById('adminUser').value.trim();
+      const senha = document.getElementById('adminSenha').value;
+      const erro  = document.getElementById('erroMsg');
+      const btn   = document.getElementById('btnAdminLogin');
+      const txt   = document.getElementById('btnTexto');
+
+      if (!user || !senha) {
+        mostrarErro('Preencha usuário e senha.');
+        return;
+      }
+
+      /* Loading */
+      btn.disabled = true;
+      txt.textContent = 'Verificando...';
+
+      setTimeout(() => {
+        const admin = ADMINS.find(a => a.usuario === user && a.senha === senha);
+
+        if (admin) {
+          sessionStorage.setItem('cisaAdminLogado', 'true');
+          sessionStorage.setItem('cisaAdminNome', admin.nome);
+          window.location.href = 'index.html';
+        } else {
+          btn.disabled = false;
+          txt.textContent = 'Entrar no Painel';
+          mostrarErro('Usuário ou senha incorretos.');
+          document.getElementById('adminSenha').value = '';
+          document.getElementById('adminSenha').focus();
+        }
+      }, 600);
+    }
+
+    function mostrarErro(msg) {
+      const el = document.getElementById('erroMsg');
+      el.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${msg}`;
+      el.style.display = 'flex';
+      setTimeout(() => { el.style.display = 'none'; }, 4000);
+    }
+
+    function toggleSenha() {
+      const input = document.getElementById('adminSenha');
+      const icon  = document.getElementById('senhaIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-regular fa-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-regular fa-eye';
+      }
+    }
+
+    /* Redireciona se já está logado */
+    if (sessionStorage.getItem('cisaAdminLogado')) {
+      window.location.href = 'index.html';
+    }
+  </script>
+
+</body>
+</html>

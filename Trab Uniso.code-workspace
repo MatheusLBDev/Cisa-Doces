@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "Trab Uniso",
+			"path": "."
+		},
+		{
+			"name": "cardapio",
+			"path": "../Trab Uniso 2/cardapio"
+		},
+		{
+			"name": "home",
+			"path": "../Trab Uniso 2/home"
+		}
+	],
+	"settings": {}
+}
